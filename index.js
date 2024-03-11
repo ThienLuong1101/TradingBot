@@ -3,135 +3,174 @@ const moment = require('moment');
 const fs = require('fs');
 const config = require('./key');
 
-//fetch data from binance spot test network
 const binance = new ccxt.binance({
     apiKey: config.binance.apiKey,
     secret: config.binance.secret,
 });
-binance.setSandboxMode(true); //stimulation trading
+binance.setSandboxMode(true);
 
+let USD = 0;
+const usdHistory = [];
 
-//access to binance market data in real-time
-async function BinanceData(symbol, timeframe, limit) {
-    const binance = new ccxt.binance();
-    const prices = await binance.fetchOHLCV(symbol, timeframe, undefined, limit);
-    const bPrices = prices.map(price => {
-        return {
-            timestamp: moment(price[0].format),
-            open: price[1],
-            high: price[2],
-            low: price[3],
-            close: price[4],
-            volume: price[5]
+// Clear the orders.json file
+function clearOrdersFile() {
+    fs.writeFile('orders.json', '[]', 'utf8', (err) => {
+        if (err) {
+            console.error('Error clearing orders file:', err);
+            return;
         }
-    })
-    const lastClosePrice = bPrices[limit - 1].close;
-    return bPrices;
+        console.log('Orders file cleared successfully.');
+    });
 }
 
-// Simple Moving Average calculation
-function calculateSMA(prices, period) {
-    const smaArray = [];
-    for (let i = 0; i < prices.length; i++) {
-        if (i >= period - 1) {
-            const sum = prices.slice(i - period + 1, i + 1).reduce((acc, val) => acc + val.close, 0);
-            smaArray.push(sum / period);
-        } else {
-            smaArray.push(null);
-        }
-    }
-    return smaArray;
-}
+// Clear the orders file before starting
+clearOrdersFile();
 
-async function TradingBot(prices) {
-    const shortLimit = 5;
-    const longLimit = 30;
-    const shortSMA = calculateSMA(prices, shortLimit);
-    const longSMA = calculateSMA(prices, longLimit);
-
-    const lastShortSMA = shortSMA[shortSMA.length - 1];
-    const lastLongSMA = longSMA[longSMA.length - 1];
-    const prevShortSMA = shortSMA[shortSMA.length - 2];
-    const prevLongSMA = longSMA[longSMA.length - 2];
-
-    let LongTrend;
-    let ShortTrend;
-    if (prevShortSMA < prevLongSMA) {
-        LongTrend = 'downLongTrend';
-    } else if (prevShortSMA > prevLongSMA) {
-        LongTrend = 'upLongTrend';
-    } else {
-        LongTrend = '?';
-    }
-
-    if (lastShortSMA < lastLongSMA) {
-        ShortTrend = 'downShortTrend';
-    } else if (lastShortSMA > lastLongSMA) {
-        ShortTrend = 'upShortTrend';
-    } else {
-        ShortTrend = '?';
-    }
-    let signal = '';
-    if (LongTrend == 'downLongTrend' && ShortTrend == 'upShortTrend') {
-        signal = 'BUY';
-    } else if (LongTrend == 'upLongTrend' && ShortTrend == 'downShortTrend') {
-        signal = 'SELL';
-    } else {
-        signal = 'HOLD';
-    }
-
-    return signal;
-}
-
-async function makeOrder(symbol, signal, quantity, lastClosePrice) {
-    try {
-        if (signal !== 'HOLD') {
-            const order = await binance.createMarketOrder(symbol, signal.toUpperCase(), quantity);
-            console.log(`${moment().format()}: ${signal} ${quantity} BTC at ${lastClosePrice}`);
-        } else {
-            console.log('HOLD');
-        }
-    } catch (error) {
-        console.error('Error making order:', error);
-    }
-}
-
-async function printBalance(lastClosePrice) {
+async function printBalance(btcPrice) {
     try {
         const balance = await binance.fetchBalance();
         const total = balance.total;
         console.log(`Balance: BTC ${total.BTC}, USDT: ${total.USDT}`);
+        USD = (total.BTC - 1) * btcPrice + total.USDT;
+        console.log(`Total USD: ${USD} \n`);
+
+
+        // Update the chart data
+        usdHistory.push(USD);
+        saveUsdHistory();
+
     } catch (error) {
         console.error('Error fetching balance:', error);
     }
 }
+// printBalance();
 
-async function calculateTotalUSD(lastClosePrice) {
+async function tick() {
     try {
-        const balance = await binance.fetchBalance();
-        const total = balance.total;
-        const totalUSD = (total.BTC - 1)* lastClosePrice + total.USDT;
-        return totalUSD;
+        const symbol = 'BTC/USDT';
+        const timeframe = '1m';
+        const limit = 5;
+        const ohlcv = await binance.fetchOHLCV(symbol, timeframe, undefined, limit);
+
+        const formattedData = ohlcv.map(candle => {
+            return {
+                timestamp: candle[0],
+                open: candle[1],
+                high: candle[2],
+                low: candle[3],
+                close: candle[4],
+                volume: candle[5],
+            };
+        });
+
+        const averagePrice = formattedData.reduce((acc, candle) => acc + candle.close, 0) / limit;
+        const lastClosePrice = formattedData[limit - 1].close;
+
+        console.log(formattedData.map(p => p.close), averagePrice, lastClosePrice);
+
+        const direction = lastClosePrice > averagePrice ? 'sell' : 'buy';
+
+        const TRADE_SIZE = 50;
+        const quantity = 200 / lastClosePrice;
+
+        const order = await binance.createMarketOrder(symbol, direction, quantity);
+        console.log(`${moment().format()}: ${direction}${quantity} BTC at ${lastClosePrice}`);
+        const DisplayOrder = {
+            Timestamp: moment().format(),
+            Signal: direction,
+            Quantity: quantity,
+            LastClosePrice: lastClosePrice
+        };
+
+        // Store the order data in a JSON file
+        storeOrder(DisplayOrder);
+
+        await printBalance(lastClosePrice);
     } catch (error) {
-        console.error('Error fetching balance:', error);
+        console.error('Error in tick function:', error);
     }
 }
 
-async function main() {
-    const symbol = 'BTC/USDT';
-    const timeframe = '1m';
-    const limit = 50;
-    const prices = await BinanceData(symbol, timeframe, limit);
-    const lastClosePrice = prices[limit - 1].close;
-    const quantity = 200 / lastClosePrice;
-    const decision = await TradingBot(prices);
-    await makeOrder(symbol, decision, quantity, lastClosePrice);
-    //draw data in line graph
+// Set up the interval to run every 1 minute (60 seconds)
+const intervalId = setInterval(tick, 6000);
 
-
+// Save usdHistory to a JSON file
+function saveUsdHistory() {
+    fs.writeFileSync('usdHistory.json', JSON.stringify(usdHistory), 'utf-8');
 }
 
-main();
+// Express.js web server to display the USD chart
+const express = require('express');
+const app = express();
+const port = 3000;
 
-setInterval(main, 60000);
+app.use(express.static('public'));
 
+app.get('/', (req, res) => {
+    res.sendFile(__dirname + '/index.html');
+});
+
+app.get('/usdHistory', (req, res) => {
+    res.json(usdHistory);
+});
+
+app.listen(port, () => {
+    console.log(`Server listening at http://localhost:${port}`);
+});
+
+// To stop the interval after a certain number of iterations (e.g., 5 times)
+let iterations = 0;
+const maxIterations = 500;
+
+function stopInterval() {
+    clearInterval(intervalId);
+    console.log("Interval stopped.");
+}
+
+// Check the number of iterations and stop the interval after reaching the limit
+function checkIterations() {
+    iterations++;
+    if (iterations === maxIterations) {
+        stopInterval();
+    }
+}
+
+function storeOrder(orderData) {
+    // Read existing data from the file
+    fs.readFile('orders.json', 'utf8', (err, data) => {
+        if (err) {
+            console.error('Error reading file:', err);
+            return;
+        }
+
+        let orders = [];
+
+        // Parse existing JSON data if available
+        if (data) {
+            try {
+                orders = JSON.parse(data);
+            } catch (error) {
+                console.error('Error parsing JSON data:', error);
+                return;
+            }
+        }
+
+        // Add the new order data to the array
+        orders.push(orderData);
+
+        // Convert the updated array to JSON format
+        const jsonData = JSON.stringify(orders, null, 2);
+
+        // Write the JSON data back to the file
+        fs.writeFile('orders.json', jsonData, 'utf8', (err) => {
+            if (err) {
+                console.error('Error writing file:', err);
+                return;
+            }
+            console.log('Order data stored successfully.');
+        });
+    });
+}
+
+// Set up a check to stop the interval after a certain number of iterations
+setInterval(checkIterations, 60000);

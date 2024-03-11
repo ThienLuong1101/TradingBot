@@ -1,19 +1,40 @@
-// Define an array of animals
-const animals = ['dog', 'cat', 'bear'];
-
-// Function to display a random animal
-function displayRandomAnimal() {
-    // Generate a random index to select an animal from the array
-    const randomIndex = Math.floor(Math.random() * animals.length);
-    const randomAnimal = animals[randomIndex];
-
-    // Update the content of the HTML element with the random animal
-    const animalDisplayElement = document.getElementById('animal-display');
-    animalDisplayElement.textContent = 'Random Animal: ' + randomAnimal;
-}
-
-// Initial call to display a random animal
-displayRandomAnimal();
-
-// Set up an interval to display a random animal every minute
-setInterval(displayRandomAnimal, 6000); // 60 seconds * 1000 milliseconds
+document.addEventListener("DOMContentLoaded", function () {
+    // Fetch USD history from usdHistory.json
+    fetch('usdHistory.json')
+        .then(response => response.json())
+        .then(usdHistory => {
+            // Create a Chart.js chart
+            const ctx = document.getElementById('usdChart').getContext('2d');
+            const usdChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: Array.from({ length: usdHistory.length }, (_, i) => i + 1),
+                    datasets: [{
+                        label: 'USD History',
+                        data: usdHistory,
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        borderWidth: 2,
+                        fill: false,
+                    }],
+                },
+                options: {
+                    scales: {
+                        x: {
+                            type: 'linear',
+                            position: 'bottom'
+                        },
+                        y: {
+                            beginAtZero: false,
+                            ticks: {
+                                stepSize: 1, // Customize the step size
+                                callback: function(value, index, values) {
+                                    // Format y-axis values as needed
+                                    return value.toFixed(2);
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        });
+});

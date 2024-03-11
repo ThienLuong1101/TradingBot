@@ -1,8 +1,20 @@
 {
+  "name": "tradebot",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
   "dependencies": {
-    "ccxt": "^4.2.66",
-    "document": "^0.4.7",
-    "fs": "^0.0.1-security",
-    "moment": "^2.30.1"
+    "ccxt": "^4.1.89",
+    "chart.js": "^4.4.1",
+    "delay": "^6.0.0",
+    "express": "^4.18.2",
+    "moment": "^2.29.4",
+    "plotly": "^1.0.6"
   }
 }

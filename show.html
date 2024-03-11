@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Information and USD Price History</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- Include Chart.js library -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="order" id="orderContainer">
+            <!-- Orders will be dynamically added here -->
+        </div>
+    </div>
+
+    <div style="width: 800px; height: 400px;">
+        <canvas id="usdPriceChart"></canvas>
+    </div>
+    <script>
+        // Fetch data from orders.json
+        fetch('orders.json')
+            .then(response => response.json())
+            .then(data => {
+                // Loop through each order and create HTML elements
+                data.forEach(order => {
+                    const orderDiv = document.createElement('div');
+                    orderDiv.classList.add('order-info');
+                    orderDiv.innerHTML = `
+                        <span class="timestamp">${order.Timestamp}</span>
+                        <span class="action">${order.Signal}</span>
+                        <span class="amount">${order.Quantity} BTC</span>
+                        <span class="price">${order.LastClosePrice}</span>
+                    `;
+                    // Append the order information to the container
+                    document.getElementById('orderContainer').appendChild(orderDiv);
+                });
+            })
+            .catch(error => console.error('Error fetching orders:', error));
+
+        // Fetch data from usdthistory.json and create the line graph
+        fetch('usdHistory.json')
+            .then(response => response.json())
+            .then(data => {
+                // Extract labels and data for the chart
+                const labels = Array.from({ length: data.length }, (_, i) => i + 1);
+                const prices = data;
+
+                // Create the chart
+                const ctx = document.getElementById('usdPriceChart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'USD Price History',
+                            data: prices,
+                            borderColor: 'blue',
+                            borderWidth: 2,
+                            fill: false
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            x: {
+                                display: true,
+                                title: {
+                                    display: true,
+                                    text: 'Time'
+                                }
+                            },
+                            y: {
+                                display: true,
+                                title: {
+                                    display: true,
+                                    text: 'USD Price'
+                                }
+                            }
+                        }
+                    }
+                });
+            })
+            .catch(error => console.error('Error fetching USD price history:', error));
+    </script>
+</body>
+</html>

@@ -1,14 +1,68 @@
 [
   {
-    "Timestamp": "2024-03-11T19:39:34+10:30",
-    "Signal": "BUY",
-    "Quantity": 0.004206697483062784,
-    "LastClosePrice": 71314.85
+    "Timestamp": "2024-03-11T20:30:39+10:30",
+    "Signal": "sell",
+    "Quantity": 0.0027895418958507794,
+    "LastClosePrice": 71696.36
   },
   {
-    "Timestamp": "2024-03-11T19:39:43+10:30",
-    "Signal": "BUY",
-    "Quantity": 0.004204910915458164,
-    "LastClosePrice": 71345.15
+    "Timestamp": "2024-03-11T20:30:44+10:30",
+    "Signal": "sell",
+    "Quantity": 0.0027893932762790836,
+    "LastClosePrice": 71700.18
+  },
+  {
+    "Timestamp": "2024-03-11T20:30:50+10:30",
+    "Signal": "sell",
+    "Quantity": 0.0027893932762790836,
+    "LastClosePrice": 71700.18
+  },
+  {
+    "Timestamp": "2024-03-11T20:30:56+10:30",
+    "Signal": "sell",
+    "Quantity": 0.0027888432882024116,
+    "LastClosePrice": 71714.32
+  },
+  {
+    "Timestamp": "2024-03-11T20:31:02+10:30",
+    "Signal": "sell",
+    "Quantity": 0.002788913677683294,
+    "LastClosePrice": 71712.51
+  },
+  {
+    "Timestamp": "2024-03-11T20:31:09+10:30",
+    "Signal": "sell",
+    "Quantity": 0.002788641861697307,
+    "LastClosePrice": 71719.5
+  },
+  {
+    "Timestamp": "2024-03-11T20:31:14+10:30",
+    "Signal": "sell",
+    "Quantity": 0.002788641861697307,
+    "LastClosePrice": 71719.5
+  },
+  {
+    "Timestamp": "2024-03-11T20:31:20+10:30",
+    "Signal": "sell",
+    "Quantity": 0.0027888390105031864,
+    "LastClosePrice": 71714.43
+  },
+  {
+    "Timestamp": "2024-03-11T20:31:26+10:30",
+    "Signal": "sell",
+    "Quantity": 0.002788853010294911,
+    "LastClosePrice": 71714.07
+  },
+  {
+    "Timestamp": "2024-03-11T20:31:32+10:30",
+    "Signal": "sell",
+    "Quantity": 0.002788853010294911,
+    "LastClosePrice": 71714.07
+  },
+  {
+    "Timestamp": "2024-03-11T20:31:38+10:30",
+    "Signal": "sell",
+    "Quantity": 0.002788656637170116,
+    "LastClosePrice": 71719.12
   }
 ]
