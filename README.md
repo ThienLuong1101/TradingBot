@@ -13,4 +13,3 @@ first install all require libraries:
 4.node index.js
 5. local host the show.html to view real-time data graphic
 
-![Uploading 430877606_1479941486201889_5667537851341157008_n.png…]()
