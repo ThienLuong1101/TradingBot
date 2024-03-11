@@ -1,8 +1,7 @@
 this project can make simple order sell/buy.
 the bot using SMA calculation to make order.
-The basic logic and tradingbot is completed.
 
-The bot will display data in local host graphic data demonstrated
+trading data are displayed in web browser by html
 
 HOW TO RUN IT:
 
