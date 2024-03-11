@@ -1,6 +1,6 @@
 {
     "binance": {
-        "apiKey": "wNhKSuAMV7eOXRpCqAI1UYp8kLCunpRmEeNADstZ95qbVYiAiGA9y8VjekGQkb0Q",
-        "secret": "G4QG1PdzwyYYxcf91xzM2fW7eG535NJnW4yeu1HqLVJh1NFRKyXPMHG1l2ksw96m"
+        "apiKey": "Your API Key",
+        "secret": "Your Secret Key"
     }
 }
