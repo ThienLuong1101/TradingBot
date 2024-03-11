@@ -1,0 +1,14 @@
+[
+  {
+    "Timestamp": "2024-03-11T19:39:34+10:30",
+    "Signal": "BUY",
+    "Quantity": 0.004206697483062784,
+    "LastClosePrice": 71314.85
+  },
+  {
+    "Timestamp": "2024-03-11T19:39:43+10:30",
+    "Signal": "BUY",
+    "Quantity": 0.004204910915458164,
+    "LastClosePrice": 71345.15
+  }
+]

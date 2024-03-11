@@ -1,0 +1,8 @@
+{
+  "dependencies": {
+    "ccxt": "^4.2.66",
+    "document": "^0.4.7",
+    "fs": "^0.0.1-security",
+    "moment": "^2.30.1"
+  }
+}
